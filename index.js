@@ -17,11 +17,14 @@ app.post("/send-email", async (req, res) => {
 
   try {
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
       auth: {
         user: process.env.GMAIL_USER,
         pass: process.env.GMAIL_APP_PASS,
       },
+      connectionTimeout: 10000,
     });
 
     await transporter.sendMail({
@@ -37,7 +40,12 @@ Mensaje: ${mensaje}
 
     res.json({ ok: true, mensaje: "Correo enviado correctamente" });
   } catch (error) {
-    res.status(500).json({ ok: false, mensaje: "Error al enviar correo" });
+    console.error("ERROR AL ENVIAR CORREO:", error.message);
+    res.status(500).json({
+      ok: false,
+      mensaje: "Error al enviar correo",
+      error: error.message,
+    });
   }
 });
 
