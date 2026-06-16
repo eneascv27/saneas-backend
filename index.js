@@ -1,7 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const nodemailer = require("nodemailer");
-require("dotenv").config();
 
 const app = express();
 
@@ -16,35 +14,44 @@ app.post("/send-email", async (req, res) => {
   const { nombre, email, empresa, mensaje } = req.body;
 
   try {
-    const transporter = nodemailer.createTransport({
-      host: "smtp-relay.brevo.com",
-      port: 465,
-secure: true,
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASS,
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": process.env.BREVO_API_KEY,
       },
-    });
-
-    await transporter.sendMail({
-      from: process.env.GMAIL_USER,
-      to: process.env.GMAIL_USER,
-      subject: "Nuevo mensaje desde la landing page de Saneas",
-      text: `
+      body: JSON.stringify({
+        sender: {
+          name: "Saneas",
+          email: process.env.EMAIL_TO,
+        },
+        to: [
+          {
+            email: process.env.EMAIL_TO,
+          },
+        ],
+        subject: "Nuevo mensaje desde la landing page de Saneas",
+        textContent: `
 Nombre: ${nombre}
 Correo: ${email}
 Empresa: ${empresa || "No especificada"}
 
 Mensaje:
 ${mensaje || "Sin mensaje"}
-      `,
+        `,
+      }),
     });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(JSON.stringify(data));
+    }
 
     res.json({
       ok: true,
       mensaje: "Correo enviado correctamente",
     });
-
   } catch (error) {
     console.error("ERROR AL ENVIAR CORREO:", error.message);
 
