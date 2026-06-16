@@ -20,18 +20,11 @@ app.post("/send-email", async (req, res) => {
 
   try {
   const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASS,
-  },
-  family: 4,
-  connectionTimeout: 30000,
-  greetingTimeout: 30000,
-  socketTimeout: 30000,
-});
+  service: "gmail",
+auth: {
+  user: process.env.GMAIL_USER,
+  pass: process.env.GMAIL_APP_PASS,
+},
     await transporter.sendMail({
       from: process.env.GMAIL_USER,
       to: process.env.GMAIL_USER,
