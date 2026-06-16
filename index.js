@@ -13,28 +13,35 @@ app.get("/", (req, res) => {
 });
 
 app.post("/send-email", async (req, res) => {
-  const { nombre, correo, mensaje } = req.body;
+  
+  const { nombre, email, empresa, mensaje } = req.body;
 
   try {
-const transporter = nodemailer.createTransport({
+  const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
+  port: 465,
+  secure: true,
   auth: {
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_APP_PASS,
   },
-  family: 4
+  family: 4,
+  connectionTimeout: 30000,
+  greetingTimeout: 30000,
+  socketTimeout: 30000,
 });
     await transporter.sendMail({
       from: process.env.GMAIL_USER,
       to: process.env.GMAIL_USER,
       subject: "Nuevo mensaje desde la landing page de Saneas",
-      text: `
+text: `
 Nombre: ${nombre}
-Correo: ${correo}
-Mensaje: ${mensaje}
-      `,
+Correo: ${email}
+Empresa: ${empresa || "No especificada"}
+
+Mensaje:
+${mensaje || "Sin mensaje"}
+`,
     });
 
     res.json({ ok: true, mensaje: "Correo enviado correctamente" });
